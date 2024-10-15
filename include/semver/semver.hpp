@@ -31,6 +31,8 @@ SOFTWARE.
 #include <regex>
 #include <utility>
 #include <vector>
+#include <iomanip>
+#include <sstream>
 
 // conditionally include <format> and its dependency <string_view> for C++20
 #ifdef __cpp_lib_format
@@ -49,6 +51,16 @@ SOFTWARE.
 
 namespace semver
 {
+    inline std::string quote(const std::string& str)
+    {
+        std::stringstream    ss;
+
+        ss << std::quoted(str);
+
+        return ss.str();
+    }
+
+
     const std::string default_prerelease_part = "0";
     const std::string numbers = "0123456789";
     const std::string prerelease_allowed_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-";
@@ -58,6 +70,7 @@ namespace semver
     const std::string loose_version_pattern = "^v?(0|[1-9]\\d*)(?:\\.(0|[1-9]\\d*))?(?:\\.(0|[1-9]\\d*))"
                                               "?(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))"
                                               "?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$";
+
 
     SEMVER_EXPORT struct semver_exception : public std::runtime_error {
         explicit semver_exception(const std::string& message) : std::runtime_error(message) { }
@@ -301,7 +314,7 @@ namespace semver
                 case semver::minor: return next_minor(prerelease);
                 case semver::patch: return next_patch(prerelease);
                 case semver::prerelease: return next_prerelease(prerelease);
-                default: throw semver_exception("Invalid 'by' parameter in 'increment()' function.");
+                default: throw semver_exception("invalid 'by' parameter in 'increment()' function.");
             }
         }
 
@@ -350,7 +363,7 @@ namespace semver
             std::string build_meta;
 
             if (!std::regex_match(version_str.c_str(), match, regex)) {
-                throw semver_exception("Invalid version: " + version_str);
+                throw semver_exception("invalid version expression " + quote(version_str));
             }
 
             auto major_m = match[1];
@@ -372,7 +385,7 @@ namespace semver
                     minor = minor_m.matched ? parse_numeric_part(minor_m) : 0;
                     patch = patch_m.matched ? parse_numeric_part(patch_m) : 0;
                 } else {
-                    throw semver_exception("Invalid version: " + version_str);
+                   throw semver_exception("invalid version expression " + quote(version_str));
                 }
 
                 return version(major, minor, patch, prerelease, build_meta);

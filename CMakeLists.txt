@@ -62,6 +62,10 @@ endif()
 ## INSTALL
 ## --------------------------------------------------------------------
 if (SEMVER_INSTALL)
+    if(DEFINED ENV{INSTALLS})
+      message($ENV{INSTALLS})
+      set(CMAKE_INSTALL_PREFIX "$ENV{INSTALLS}" CACHE PATH "set CMAKE_INSTALL_PREFIX" FORCE)
+    endif()
     include(CMakePackageConfigHelpers)
     include(GNUInstallDirs)
 
